@@ -31,7 +31,7 @@ To simplify payments, the application runs a debt-simplification algorithm that 
 
 ## Project Structure
 
-fairshare/
+SplitSmart/
 ├── backend/
 │   ├── ai/
 │   ├── approvals/
@@ -87,8 +87,8 @@ No database setup needed for development. SQLite is used locally and requires no
 
 Clone the repository and navigate to the backend directory:
 ```bash
-git clone [REPO URL]
-cd fairshare/backend
+git clone https://github.com/Kunalsharma45/SplitSmart.git
+cd SplitSmart/backend
 ```
 
 Create a Python virtual environment:
@@ -141,7 +141,7 @@ All REST endpoints are available under http://localhost:8000/api/v1/.
 
 Open a second terminal window, navigate to the frontend directory, install the node modules, and run the development build:
 ```bash
-cd fairshare/frontend
+cd SplitSmart/frontend
 npm install
 cp .env.example .env
 npm run dev
