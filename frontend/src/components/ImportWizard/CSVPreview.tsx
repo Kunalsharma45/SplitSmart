@@ -1,6 +1,7 @@
 import React from 'react';
 import Papa from 'papaparse';
 import detectAnomaliesForRows, { Anomaly } from '../../utils/anomalyDetector';
+import AnomalyCard from './AnomalyCard';
 
 type RawRow = { [k: string]: string };
 
@@ -10,6 +11,7 @@ export type PreviewRow = {
   valid: boolean;
   errors: string[];
   parsed_row: any | null;
+  anomalies?: Anomaly[];
 };
 
 type Props = {
@@ -17,14 +19,10 @@ type Props = {
   maxRows?: number;
   onPreview?: (rows: PreviewRow[]) => void;
   groupMembers?: string[];
+  groupId?: string;
 };
 
-function basicSplitParse(entry: string) {
-  if (!entry) return [] as string[];
-  return entry.split(';').map((s) => s.trim()).filter(Boolean);
-}
-
-export default function CSVPreview({ file, maxRows = 200, onPreview, groupMembers }: Props) {
+export default function CSVPreview({ file, maxRows = 200, onPreview, groupMembers, groupId }: Props) {
   const [rows, setRows] = React.useState<PreviewRow[]>([]);
   const [summary, setSummary] = React.useState<{clean:number,warnings:number,errors:number,infos:number}>({clean:0,warnings:0,errors:0,infos:0});
   const [editingRow, setEditingRow] = React.useState<number | null>(null);
@@ -37,7 +35,7 @@ export default function CSVPreview({ file, maxRows = 200, onPreview, groupMember
       const anomalies = anomaliesAll[idx] || [];
       const combinedErrors = [...(r.errors || []), ...anomalies.filter(a=>a.level==='error').map(a=>a.message)];
       const valid = combinedErrors.length === 0;
-      return { ...r, errors: combinedErrors, valid };
+      return { ...r, errors: combinedErrors, valid, anomalies };
     });
     const counts = {clean:0,warnings:0,errors:0,infos:0};
     anomaliesAll.forEach((alist) => {
@@ -110,10 +108,33 @@ export default function CSVPreview({ file, maxRows = 200, onPreview, groupMember
                   <button onClick={() => { setEditingRow(r.row_number); setEditingDraft(r.raw); }} className="text-xs text-sky-600">Edit</button>
                 </div>
               </div>
-              {!r.valid && (
-                <ul className="mt-2 list-disc pl-5 text-xs text-red-700">
-                  {r.errors.map((e, i) => <li key={i}>{e}</li>)}
-                </ul>
+
+              {/* If row has issues, render AnomalyCard for each error/warning */}
+              {!r.valid && r.anomalies && r.anomalies.length > 0 && (
+                <div className="mt-2 space-y-3">
+                  {r.anomalies.map((anomaly, index) => (
+                    <AnomalyCard
+                      key={index}
+                      anomaly={anomaly}
+                      rowNumber={r.row_number}
+                      rawRowData={r.raw}
+                      groupId={groupId || ''}
+                      groupMembers={[]}
+                      onActionApplied={(action) => {
+                        if (action === 'REJECT') {
+                          // Remove the row from the preview list
+                          const updated = rows.filter(rr => rr.row_number !== r.row_number);
+                          reanalyzeAndEmit(updated);
+                        } else if (action === 'KEEP') {
+                          // Clean up error state/allow row
+                          const updated = rows.map(rr => rr.row_number === r.row_number ? { ...rr, valid: true } : rr);
+                          setRows(updated);
+                        }
+                      }}
+                      onSkip={() => {}}
+                    />
+                  ))}
+                </div>
               )}
 
               {editingRow === r.row_number && editingDraft && (

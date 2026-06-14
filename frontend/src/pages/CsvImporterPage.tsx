@@ -198,7 +198,8 @@ export default function CsvImporterPage() {
           </div>
 
           {/* Client-side preview component */}
-          <CSVPreview file={file} onPreview={(rows) => setClientRows(rows)} />
+          <CSVPreview file={file} onPreview={(rows) => setClientRows(rows)} groupId={groupId} />
+
 
           <div className="flex flex-wrap gap-3">
             <button onClick={parseCsv} disabled={!file || !groupId || loading} className="rounded-2xl bg-slate-900 px-4 py-2 text-white disabled:opacity-60">Parse CSV</button>
