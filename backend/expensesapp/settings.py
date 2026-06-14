@@ -22,6 +22,11 @@ SECRET_KEY = os.getenv('DJANGO_SECRET_KEY', 'replace-me-with-a-secure-key')
 DEBUG = os.getenv('DEBUG', 'True') == 'True'
 ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '127.0.0.1,localhost').split(',')
 
+render_host = os.getenv('RENDER_EXTERNAL_HOSTNAME')
+if render_host:
+    ALLOWED_HOSTS.append(render_host)
+
+
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
