@@ -1,4 +1,5 @@
 from datetime import date, timedelta
+from django.utils import timezone
 
 from django.urls import reverse
 from rest_framework import status
@@ -6,6 +7,7 @@ from rest_framework.test import APITestCase
 
 from users.models import User
 from .models import Group, GroupMember
+
 
 
 class GroupsTests(APITestCase):
@@ -29,30 +31,31 @@ class GroupsTests(APITestCase):
 
     def test_list_groups_for_member(self):
         group = Group.objects.create(name='House', created_by=self.user)
-        GroupMember.objects.create(group=group, user=self.user, role=GroupMember.ADMIN, joined_at=date.today())
+        GroupMember.objects.create(group=group, user=self.user, role=GroupMember.ADMIN, joined_at=timezone.localdate())
         response = self.client.get(reverse('group-list-create'))
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data['results']), 1)
 
     def test_add_member_requires_admin(self):
         group = Group.objects.create(name='House', created_by=self.user)
-        GroupMember.objects.create(group=group, user=self.user, role=GroupMember.ADMIN, joined_at=date.today())
+        GroupMember.objects.create(group=group, user=self.user, role=GroupMember.ADMIN, joined_at=timezone.localdate())
         response = self.client.post(reverse('group-member-add', kwargs={'pk': group.id}), {
             'user_id': str(self.member.id),
             'role': GroupMember.MEMBER,
-            'joined_at': date.today().isoformat(),
+            'joined_at': timezone.localdate().isoformat(),
         }, format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertTrue(group.members.filter(user=self.member).exists())
 
     def test_remove_member_sets_left_date(self):
         group = Group.objects.create(name='House', created_by=self.user)
-        GroupMember.objects.create(group=group, user=self.user, role=GroupMember.ADMIN, joined_at=date.today())
-        membership = GroupMember.objects.create(group=group, user=self.member, role=GroupMember.MEMBER, joined_at=date.today())
+        GroupMember.objects.create(group=group, user=self.user, role=GroupMember.ADMIN, joined_at=timezone.localdate())
+        membership = GroupMember.objects.create(group=group, user=self.member, role=GroupMember.MEMBER, joined_at=timezone.localdate())
         response = self.client.delete(reverse('group-member-remove', kwargs={'pk': group.id, 'uid': self.member.id}))
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         membership.refresh_from_db()
-        self.assertEqual(membership.left_at, date.today())
+        self.assertEqual(membership.left_at, timezone.localdate())
+
 
     def test_active_members_on_date_includes_joined_at_and_left_at(self):
         group = Group.objects.create(name='House', created_by=self.user)
