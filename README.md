@@ -1,146 +1,66 @@
-# SplitSmart — Shared Expenses Manager
+# FairShare
 
-> Simple, reliable shared-expenses for flatmates — clean balances, membership-aware calculations, and robust CSV import with anomaly detection.
+A shared expenses app built for a group of flatmates who outgrew their spreadsheet.
 
-[![Python](https://img.shields.io/badge/python-3.11%2B-blue)](https://www.python.org/)
-[![Django](https://img.shields.io/badge/django-4.2-green)](https://www.djangoproject.com/)
-[![React](https://img.shields.io/badge/react-18-blue)](https://reactjs.org/)
-[![License: MIT](https://img.shields.io/badge/license-MIT-yellow.svg)](LICENSE)
-[![Deployed](https://img.shields.io/badge/deployed-live-brightgreen)](https://splitsmart.vercel.app)
-
-Live demo: https://splitsmart.vercel.app
-
-GitHub repo: https://github.com/yourusername/splitsmart
+Handles messy imported data, tracks who owes whom with membership date awareness, and shows the minimum payments needed to clear all debts.
 
 ---
 
-## Table of Contents
+## The Problem
 
-- [Project Banner](#splitsmart--shared-expenses-manager)
-- [Problem Statement](#problem-statement)
-- [Features](#features)
-- [Project Structure](#project-structure)
-- [Prerequisites](#prerequisites)
-- [Local Development Setup](#local-development-setup)
-- [Environment Variables](#environment-variables)
-- [CSV Import Guide](#csv-import-guide)
-- [Running Tests](#running-tests)
-- [API Documentation](#api-documentation)
-- [Deployment](#deployment)
-- [Key Decisions](#key-decisions)
-- [AI Tools Used](#ai-tools-used)
-- [Known Limitations](#known-limitations)
-- [Future Improvements](#future-improvements)
-- [Contributing](#contributing)
-- [License](#license)
+A group of four flatmates—Aisha, Rohan, Priya, and Meera—tracked their shared household expenses in a spreadsheet starting in February. The situation became complicated when a friend named Dev joined them for a trip where some expenses were paid in US dollars. The spreadsheet quickly accumulated messy data, duplicate entries, a settlement logged incorrectly as an expense, and ambiguous formatting. The flatmates had no automated way to calculate final balances or agree on who owed whom.
+
+Each flatmate has a specific requirement for the app:
+Aisha wants a simple summary of transactions: "One number per person. Who pays whom. How much. Done."
+Rohan wants visibility into his debts: "If the app says I owe 2300 rupees I want to see exactly which expenses make that up."
+Priya wants currency corrections: "Half the trip was in dollars. The sheet pretends a dollar is a rupee. Fix it."
+Sam, who moved in later, wants date-aware splitting: "I moved in mid April. March electricity should not affect my balance."
+Meera wants control over data cleanup: "Clean up the duplicates but I want to approve anything the app deletes or changes."
 
 ---
 
-## Problem Statement
+## What the App Does
 
-Flatmate finances get messy fast. `SplitSmart` was built as an internship assignment to solve a realistic shared-expense spreadsheet problem faced by six flatmates (Aisha, Rohan, Priya, Meera, Sam, Dev). Requirements included:
+FairShare automates the processing of messy CSV spreadsheets by parsing rows in the browser and identifying twelve types of common data errors. Users review these flagged rows with the help of a local AI explainer that describes the problem and suggests an action. Flagged deletions or modifications do not apply automatically; instead, they enter an approval queue where an admin must approve them to preserve data integrity.
 
-- Aisha: "One number per person" — concise per-person balance views.
-- Rohan: Drill-down capability to inspect exactly which expenses created any balance.
-- Priya: Multi-currency support (USD + INR) and consistent conversion.
-- Sam: Membership-date-aware balances (Sam joined/left mid-period).
-- Meera: No destructive action without approval — an approval queue for deletions/edits.
+The app supports dynamic membership dates for roommates. When calculating balances, the engine excludes members who were not active in the group on the specific date of the expense. The balance engine parses splits—whether equal, unequal, percentage, or share-based—and aggregates them into a single net balance for each person. The calculation supports live and manual USD to INR conversions so that Priya's trip expenses are split using the correct historical rates.
 
-The app solves messy CSV exports, multi-currency, dynamic membership windows, unclear balances, and provides an auditable import workflow.
-
----
-
-## Features
-
-### Authentication
-
-- ✅ JWT login / register / logout (backend: `djangorestframework-simplejwt`) 🔐
-- ✅ Auto token refresh
-- ✅ Protected routes (frontend)
-
-### Groups
-
-- ✅ Create and manage groups 👥
-- ✅ Dynamic membership (`joined_at` / `left_at`) with inclusive date handling
-- ✅ Role-based access (Admin / Member)
-- ✅ Past members visible with dates
-
-### Expenses
-
-- ✅ Four split types: `Equal`, `Unequal`, `Percentage`, `Share` 💸
-- ✅ Multi-currency: USD and INR (live exchange rate at import)
-- ✅ Live exchange rate via an external API
-- ✅ Soft delete with approval queue (Meera's requirement) 🟡
-- ✅ Expense comments thread
-
-### CSV Importer
-
-- ✅ Client-side preview with `PapaParse` and inline edits 🟢
-- ✅ 12+ anomaly types detected (listed below)
-- ✅ Two-step import: preview → confirm
-- ✅ Full import report generated (JSON)
-- ✅ Approval queue for destructive changes
-
-### Balance Engine
-
-- ✅ Membership-date-aware calculations
-- ✅ Debt simplification algorithm
-- ✅ Group balance + personal summary
-- ✅ Drill-down: which expenses make up a balance 🔎
-
-### Settlements
-
-- ✅ Record payments
-- ✅ Undo within 24 hours
-- ✅ Settlement history
-
-### Advanced
-
-- ✅ Approval queue
-- ✅ Full audit log
-- ✅ Real-time notifications (WebSocket) ⚡
-- ✅ Analytics dashboard (`Recharts`) 📊
-- ✅ AI Smart Split Suggester (OpenAI, configurable) 🤖
-- ✅ Placeholder users (e.g., Dev as guest)
+To simplify payments, the application runs a debt-simplification algorithm that reduces the total number of transactions needed to clear all group balances. Roommates can click into any net balance to view a detailed breakdown of the exact expenses, splits, and dates that make up the total. When a payment is recorded, the engine updates the balances, and users can undo any settlement within a fixed 24-hour window to correct mistakes.
 
 ---
 
 ## Project Structure
 
-```
-splitsmart/
+fairshare/
 ├── backend/
-│   ├── config/
-│   │   ├── settings/
-│   │   │   ├── base.py
-│   │   │   ├── development.py
-│   │   │   └── production.py
+│   ├── ai/
+│   ├── approvals/
+│   ├── audit/
+│   ├── balances/
+│   ├── expenses/
+│   ├── groups/
+│   ├── imports/
+│   ├── notifications/
+│   ├── settlements/
+│   ├── users/
+│   ├── expensesapp/
+│   │   ├── settings.py
 │   │   ├── urls.py
-│   │   ├── asgi.py
-│   │   └── wsgi.py
-│   ├── apps/
-│   │   ├── users/
-│   │   ├── groups/
-│   │   ├── expenses/
-│   │   ├── imports/
-│   │   ├── balances/
-│   │   ├── settlements/
-│   │   ├── approvals/
-│   │   ├── audit/
-│   │   └── notifications/
-│   ├── requirements.txt
-│   ├── requirements-dev.txt
+│   │   └── asgi.py
 │   ├── manage.py
+│   ├── requirements.txt
 │   └── .env.example
 ├── frontend/
 │   ├── src/
-│   │   ├── components/
 │   │   ├── pages/
+│   │   ├── components/
+│   │   │   └── ImportWizard/
 │   │   ├── hooks/
-│   │   ├── context/
+│   │   ├── contexts/
+│   │   ├── lib/
 │   │   ├── services/
-│   │   ├── utils/
-│   │   └── tests/
+│   │   ├── types/
+│   │   └── utils/
 │   ├── package.json
 │   └── .env.example
 ├── docs/
@@ -149,410 +69,294 @@ splitsmart/
 │   ├── AI_USAGE.md
 │   └── BUILD_PLAN.md
 └── README.md
+
+---
+
+## Requirements
+
+Python 3.11 or higher
+Node.js 18 or higher
+npm 9 or higher
+Git
+
+No database setup needed for development. SQLite is used locally and requires no installation.
+
+---
+
+## Backend Setup
+
+Clone the repository and navigate to the backend directory:
+```bash
+git clone [REPO URL]
+cd fairshare/backend
 ```
 
----
-
-## Prerequisites
-
-- Python 3.11+
-- Node.js 18+
-- npm 9+
-- Git
-- MySQL (production)
-- Redis (production)
-
----
-
-## Local Development Setup
-
-Follow these exact steps to run the app locally.
-
-### Backend setup
-
+Create a Python virtual environment:
 ```bash
-# 1. Clone the repository
-git clone https://github.com/yourusername/splitsmart.git
-cd splitsmart
-
-# 2. Create and activate virtual environment
 python -m venv venv
-
-# On Windows:
-venv\Scripts\activate
-
-# On Mac/Linux:
-source venv/bin/activate
-
-# 3. Install dependencies
-cd backend
-pip install -r requirements.txt
-pip install -r requirements-dev.txt
-
-# 4. Copy environment file
-cp .env.example .env
-# Edit .env with your values (see Environment Variables section)
-
-# 5. Run database migrations
-python manage.py migrate
-
-# 6. Create superuser (admin account)
-python manage.py createsuperuser
-
-# 7. Load sample data (optional)
-python manage.py loaddata fixtures/sample_data.json
-
-# 8. Start backend server
-python manage.py runserver
-# OR with Daphne (supports WebSocket):
-daphne -p 8000 config.asgi:application
-
-# Backend runs at: http://localhost:8000
-# Admin panel:      http://localhost:8000/admin/
-# API base URL:     http://localhost:8000/api/v1/
 ```
 
-### Frontend setup
+Activate the virtual environment:
+* Windows:
+  ```cmd
+  venv\Scripts\activate
+  ```
+* Mac or Linux:
+  ```bash
+  source venv/bin/activate
+  ```
 
+Install the required Python dependencies:
 ```bash
-# 1. Open new terminal, go to frontend folder
-cd frontend
-
-# 2. Install dependencies
-npm install
-
-# 3. Copy environment file
-cp .env.example .env
-# Edit .env with your values
-
-# 4. Start development server
-npm run dev
-
-# Frontend runs at: http://localhost:5173
+pip install -r requirements.txt
 ```
+
+Create your local environment configuration:
+```bash
+cp .env.example .env
+```
+
+Apply database migrations:
+```bash
+python manage.py migrate
+```
+
+Create an administrative account:
+```bash
+python manage.py createsuperuser
+```
+
+Start the ASGI development server:
+```bash
+daphne -p 8000 expensesapp.asgi:application
+```
+
+The backend runs at http://localhost:8000.
+The Django admin panel is accessible at http://localhost:8000/admin.
+All REST endpoints are available under http://localhost:8000/api/v1/.
+
+---
+
+## Frontend Setup
+
+Open a second terminal window, navigate to the frontend directory, install the node modules, and run the development build:
+```bash
+cd fairshare/frontend
+npm install
+cp .env.example .env
+npm run dev
+```
+
+The React frontend runs at http://localhost:5173.
 
 ---
 
 ## Environment Variables
 
-Two example `.env` files are provided below. Copy the appropriate file and fill values.
-
-### Backend `.env.example`
-
-```env
-# Django
-SECRET_KEY=your-secret-key-here-generate-with-django
+Backend .env.example:
+```
+SECRET_KEY=replace-with-a-long-random-string
 DEBUG=True
 ALLOWED_HOSTS=localhost,127.0.0.1
 
-# Database (SQLite for dev — no config needed)
-# For production MySQL:
-DB_ENGINE=django.db.backends.mysql
-DB_NAME=splitsmart_db
-DB_USER=your_db_user
-DB_PASSWORD=your_db_password
-DB_HOST=localhost
-DB_PORT=3306
+DB_ENGINE=django.db.backends.sqlite3
+DB_NAME=db.sqlite3
 
-# JWT Settings
 JWT_ACCESS_TOKEN_LIFETIME_MINUTES=15
 JWT_REFRESH_TOKEN_LIFETIME_DAYS=7
 
-# CORS
-CORS_ALLOWED_ORIGINS=http://localhost:5173,https://splitsmart.vercel.app
+CORS_ALLOWED_ORIGINS=http://localhost:5173
 
-# Redis (only needed in production for WebSocket)
-REDIS_URL=redis://localhost:6379
-
-# Currency Exchange Rate API
-EXCHANGE_RATE_API_KEY=your-exchangerate-api-key
+EXCHANGE_RATE_API_KEY=get-from-exchangerate-api.com
 EXCHANGE_RATE_API_URL=https://v6.exchangerate-api.com/v6
 
-# OpenAI (for Smart Split Suggester)
-OPENAI_API_KEY=your-openai-api-key
+OPENAI_API_KEY=get-from-platform.openai.com
 OPENAI_MODEL=gpt-4o-mini
+AI_MAX_CALLS_PER_HOUR=20
 
-# Email (for placeholder user invites)
-EMAIL_HOST=smtp.gmail.com
-EMAIL_PORT=587
-EMAIL_HOST_USER=your-email@gmail.com
-EMAIL_HOST_PASSWORD=your-app-password
-EMAIL_USE_TLS=True
-
-# Environment
-DJANGO_SETTINGS_MODULE=config.settings.development
+DJANGO_SETTINGS_MODULE=expensesapp.settings
 ```
 
-### Frontend `.env.example`
+For production settings, also configure:
+```
+DB_ENGINE=django.db.backends.mysql
+DB_NAME=fairshare_db
+DB_USER=your_db_user
+DB_PASSWORD=your_db_password
+DB_HOST=your_db_host
+DB_PORT=3306
+REDIS_URL=your_redis_url
+CORS_ALLOWED_ORIGINS=https://your-vercel-url.vercel.app
+```
 
-```env
-# API
+Frontend .env.example:
+```
 VITE_API_BASE_URL=http://localhost:8000/api/v1
 VITE_WS_BASE_URL=ws://localhost:8000
+```
 
-# For production:
-# VITE_API_BASE_URL=https://splitsmart-api.onrender.com/api/v1
-# VITE_WS_BASE_URL=wss://splitsmart-api.onrender.com
+For production build:
+```
+VITE_API_BASE_URL=https://your-render-url.onrender.com/api/v1
+VITE_WS_BASE_URL=wss://your-render-url.onrender.com
 ```
 
 ---
 
-## CSV Import Guide
+## Importing the CSV
 
-CSV import is a two-step preview/confirm flow. The client parses CSV using `PapaParse` and runs local anomaly detection. Clean rows are importable; flagged rows require review.
+1. Log in to the application.
+2. Open your group dashboard.
+3. Click on the Import Expenses button.
+4. Upload your expenses_export.csv file.
+5. The application parses the spreadsheet rows client-side in the browser and displays them in a preview table.
+6. Rows with data issues are highlighted:
+   * Red rows represent critical errors and will be rejected.
+   * Yellow rows indicate warnings that need a user decision.
+   * Green rows represent clean data ready for import.
+7. For any yellow row, click the Explain with AI button to read a plain English explanation of what is wrong and how to fix it.
+8. Approve, edit, or reject each flagged row directly in the UI.
+9. Click Confirm Import to submit the parsed entries.
+10. Download the generated Import Report listing every anomaly detected and the action taken.
 
-Steps:
-
-1. Log in to the app
-2. Open your group → click **Import Expenses**
-3. Upload `expenses_export.csv`
-4. App parses CSV client-side instantly — shows preview table
-5. Review anomaly report:
-   - 🔴 Red rows = errors (missing fields, unreadable)
-   - 🟡 Yellow rows = warnings (duplicates, negative amounts, USD)
-   - 🟢 Green rows = clean, ready to import
-6. Fix or approve flagged rows (inline edit)
-7. Click **Confirm Import**
-8. Download Import Report (JSON)
-
-Anomaly types detected (12):
-
-1. DUPLICATE_ROW
-2. NEGATIVE_AMOUNT
-3. SETTLEMENT_AS_EXPENSE
-4. CURRENCY_MISMATCH
-5. MEMBER_NOT_IN_GROUP
-6. DATE_OUTSIDE_MEMBERSHIP
-7. MISSING_REQUIRED_FIELD
-8. INCONSISTENT_DATE_FORMAT
-9. AMOUNT_FORMAT_ISSUE
-10. SPLIT_SUM_MISMATCH
-11. DUPLICATE_SETTLEMENT
-12. UNKNOWN_SPLIT_TYPE
+The CSV file cannot be modified before uploading. All corrections must be resolved inside the application interface.
 
 ---
 
 ## Running Tests
 
-### Backend tests
-
+To run the backend test suite:
 ```bash
 cd backend
 python manage.py test
+python manage.py test imports
+python manage.py test balances
+python manage.py test ai
+```
 
-# Run specific app tests
-python manage.py test apps.imports
-python manage.py test apps.balances
-
-# Coverage
+To run with coverage:
+```bash
 pip install coverage
 coverage run manage.py test
 coverage report
-coverage html
 ```
 
-### Frontend tests
-
+To run the frontend test suite:
 ```bash
 cd frontend
-npm test
-
-# Run anomaly detector tests specifically (Vitest)
-npm test -- --testPathPattern="anomalyDetector.test"
-
-# Watch mode
-npm test -- --watch
+npm run test
+npm run test src/utils/__tests__/anomalyDetector.test.ts
+npm run test src/tests/anomalyCard.test.tsx
 ```
-
-Key scenarios covered by tests (examples): membership-window logic, multi-currency conversion, duplicate detection, negative-amount handling, split validation, settlement undo rules.
 
 ---
 
-## API Documentation (selected endpoints)
+## API Reference
 
-AUTH
+Auth endpoints:
+* `POST   /api/v1/users/register/` - Register new user
+* `POST   /api/v1/users/login/` - JWT login
+* `POST   /api/v1/users/logout/` - Logout and blacklist refresh token
+* `POST   /api/v1/users/token/refresh/` - Refresh JWT access token
+* `GET    /api/v1/users/me/` - Retrieve authenticated user profile
+* `PUT    /api/v1/users/change-password/` - Update password with validation
 
-```
-POST   /api/v1/auth/register/
-POST   /api/v1/auth/login/
-POST   /api/v1/auth/logout/
-POST   /api/v1/auth/token/refresh/
-GET    /api/v1/auth/me/
-PUT    /api/v1/auth/change-password/
-```
+Group endpoints:
+* `GET    /api/v1/groups/` - List user groups
+* `POST   /api/v1/groups/` - Create new group
+* `GET    /api/v1/groups/:id/` - Get group details
+* `PUT    /api/v1/groups/:id/` - Update group settings
+* `DELETE /api/v1/groups/:id/` - Delete group
+* `GET    /api/v1/groups/:id/members/` - List group members
+* `POST   /api/v1/groups/:id/members/` - Add member with join date
+* `PATCH  /api/v1/groups/:id/members/:uid/` - Update member dates/roles
+* `DELETE /api/v1/groups/:id/members/:uid/` - Remove member
+* `GET    /api/v1/groups/:id/balances/` - Calculate group balances
+* `GET    /api/v1/groups/:id/analytics/` - Group spending analytics
 
-GROUPS
+Expense endpoints:
+* `GET    /api/v1/expenses/` - List group expenses
+* `POST   /api/v1/expenses/` - Create new expense with splits
+* `GET    /api/v1/expenses/:id/` - Retrieve specific expense
+* `PUT    /api/v1/expenses/:id/` - Edit expense
+* `DELETE /api/v1/expenses/:id/` - Delete expense (triggers approval queue)
+* `GET    /api/v1/expenses/:id/comments/` - Get comments on expense
+* `POST   /api/v1/expenses/:id/comments/` - Add comment
 
-```
-GET    /api/v1/groups/
-POST   /api/v1/groups/
-GET    /api/v1/groups/:id/
-PUT    /api/v1/groups/:id/
-DELETE /api/v1/groups/:id/
-GET    /api/v1/groups/:id/members/
-POST   /api/v1/groups/:id/members/
-PATCH  /api/v1/groups/:id/members/:uid/
-DELETE /api/v1/groups/:id/members/:uid/
-GET    /api/v1/groups/:id/balances/
-GET    /api/v1/groups/:id/analytics/
-```
+Import endpoints:
+* `POST   /api/v1/imports/csv/parse/` - Parse CSV file and return rows
+* `POST   /api/v1/imports/csv/` - Confirm and execute import of valid rows
 
-EXPENSES
+Balance endpoints:
+* `GET    /api/v1/balances/personal/` - Get personal balance summary
+* `GET    /api/v1/balances/personal/breakdown/` - Get transaction-level balance breakdown
+* `GET    /api/v1/balances/settlement-plan/` - Generate simplified debt settlement plan
 
-```
-GET    /api/v1/expenses/
-POST   /api/v1/expenses/
-GET    /api/v1/expenses/:id/
-PUT    /api/v1/expenses/:id/
-DELETE /api/v1/expenses/:id/
-GET    /api/v1/expenses/:id/comments/
-POST   /api/v1/expenses/:id/comments/
-```
+Settlement endpoints:
+* `GET    /api/v1/settlements/` - List recorded settlements
+* `POST   /api/v1/settlements/` - Record a payment between roommates
+* `DELETE /api/v1/settlements/:id/` - Undo a settlement (allowed within 24 hours)
 
-IMPORT
+Approval endpoints:
+* `GET    /api/v1/approvals/` - List pending approvals
+* `POST   /api/v1/approvals/:id/approve/` - Approve deletion request
+* `POST   /api/v1/approvals/:id/reject/` - Reject deletion request
 
-```
-POST   /api/v1/import/upload/
-GET    /api/v1/import/:session_id/report/
-POST   /api/v1/import/:session_id/confirm/
-POST   /api/v1/import/:session_id/cancel/
-```
+Notification endpoints:
+* `GET    /api/v1/notifications/` - List in-app notifications
+* `POST   /api/v1/notifications/mark-read/` - Mark specific notification as read
+* `POST   /api/v1/notifications/mark-all-read/` - Mark all notifications as read
 
-BALANCES
+AI endpoints:
+* `POST   /api/v1/ai/explain-anomaly/` - Explain CSV anomaly using OpenAI
 
-```
-GET    /api/v1/balances/personal/
-GET    /api/v1/balances/personal/breakdown/
-GET    /api/v1/balances/settlement-plan/
-```
-
-SETTLEMENTS
-
-```
-GET    /api/v1/settlements/
-POST   /api/v1/settlements/
-DELETE /api/v1/settlements/:id/
-```
-
-APPROVALS
-
-```
-GET    /api/v1/approvals/
-POST   /api/v1/approvals/:id/approve/
-POST   /api/v1/approvals/:id/reject/
-```
-
-WEBSOCKET
-
-```
-ws://<host>/ws/notifications/?token=<jwt_access_token>
-```
+WebSocket endpoint:
+* `ws://localhost:8000/ws/notifications/?token=[JWT_TOKEN]` - Real-time notification updates
 
 ---
 
 ## Deployment
 
-### Backend (Render)
+Backend on Render:
+1. Create a new Web Service on render.com and connect your GitHub repository.
+2. Set the build command: `pip install -r requirements.txt`.
+3. Set the start command: `daphne -p $PORT expensesapp.asgi:application`.
+4. Define your environment variables matching `.env.example`.
+5. Set `DJANGO_SETTINGS_MODULE` to `expensesapp.settings`.
 
-```bash
-# 1. Push code to GitHub
-# 2. On render.com create a new Web Service linking the repository
-# 3. Build command:
-pip install -r requirements.txt
-# 4. Start command:
-daphne -p $PORT config.asgi:application
-# 5. Set environment variables from .env.example in Render dashboard
-# 6. Add managed MySQL (PlanetScale) or connect external
-# 7. Deploy
-```
-
-### Frontend (Vercel)
-
-```bash
-# 1. Go to vercel.com and import the GitHub project
-# 2. Select the `frontend` folder
-# 3. Framework: Vite
-# 4. Build command: npm run build
-# 5. Output directory: dist
-# 6. Set env vars (VITE_API_BASE_URL, VITE_WS_BASE_URL)
-# 7. Deploy
-```
-
-### Database (PlanetScale)
-
-```bash
-# 1. Create a database on PlanetScale
-# 2. Add connection string to Render environment variables
-# 3. Run migrations on deployed instance (via a one-off or CI runner):
-python manage.py migrate
-```
-
----
-
-## Key Decisions
-
-- SQLite for dev (zero setup) and MySQL for production (compatibility with PlanetScale).
-- Soft delete with an approval queue instead of hard delete — preserves auditability and lets Meera approve destructive actions.
-- Membership dates are inclusive; this simplifies the user's expectation for monthly cutoffs.
-- Any rounding remainder goes to payer to keep integer-safe accounting.
-- Debt simplification is always enabled to minimize inter-person transactions.
-- Settlement undo window: 24 hours (balance safety vs UX).
-
-See `docs/DECISIONS.md` for the full rationale.
-
----
-
-## AI Tools Used
-
-- GitHub Copilot — primary development collaborator
-- OpenAI GPT-4o-mini — used for the Smart Split Suggester feature (configurable via `OPENAI_API_KEY`)
-
-See `docs/AI_USAGE.md` for prompts, guardrails, and mistakes caught during development.
+Frontend on Vercel:
+1. Create a new project on vercel.com and select the frontend directory of your repository.
+2. Set the build command: `npm run build`.
+3. Set the output directory: `dist`.
+4. Configure `VITE_API_BASE_URL` pointing to your Render Web Service domain `/api/v1`.
+5. Configure `VITE_WS_BASE_URL` pointing to your Render Web Service domain.
 
 ---
 
 ## Known Limitations
 
-- Only INR and USD supported out of the box.
-- Web only (responsive), no native mobile app.
-- Exchange rate fetched at import time (not live per expense).
-- Placeholder users (guests) cannot log in.
-- Settlement undo window fixed at 24 hours (not configurable yet).
-- No recurring expense support.
-- Email notifications configurable but not enabled by default.
+The application only supports INR and USD. Extending support to additional currencies requires updating the currency service views and modifying the decimal conversion steps inside the balance calculation script.
+
+Exchange rates are fetched once during the CSV import and stored permanently per expense record. Changes in live market rates after the import do not affect historical calculations.
+
+Placeholder profiles created for unrecognized CSV names do not have login credentials. An administrator must invite them by email to register their account and merge their profile.
+
+The undo window for recorded payments is hardcoded to 24 hours inside the settlements view and cannot be customized by group administrators.
+
+Notifications are strictly in-app. Email and SMS notification microservices are not integrated.
 
 ---
 
-## Future Improvements
+## AI Tools Used
 
-- Mobile app (React Native)
-- Expand supported currencies
-- Recurring expenses
-- Email / SMS notifications
-- OCR receipt scanning
-- Bank integrations for auto-settlement
-- Multi-language support
+GitHub Copilot was used to generate code suggestions, write tests, and draft documentation. All generated code was reviewed and modified before use.
 
----
+OpenAI GPT-4o-mini is integrated into the CSV import workflow. When a row fails validation, the user can request an explanation. The raw row dictionary is sent to the backend, which proxies it to OpenAI and returns a plain English explanation. The API key is stored in the backend environment and is never exposed to the client browser.
 
-## Contributing
-
-1. Fork the repo
-2. Create a feature branch `feature/your-feature-name`
-3. Open a PR against `main`
-
-Guidelines:
-
-- Branch naming: `feature/*`, `fix/*`, `docs/*`
-- Commit messages: `feat:`, `fix:`, `docs:`, `test:`, `chore:`
-- Run tests and linters before opening PR
+Full details of prompts used and AI mistakes caught during development are documented in AI_USAGE.md.
 
 ---
 
 ## License
 
-This project is licensed under the MIT License — see the `LICENSE` file.
-
----
-
-If you need I can also generate a `CONTRIBUTING.md`, CI configuration for running backend/frontend tests on each PR, and a `docs/SCOPE.md` that lists the 12 anomaly definitions in detail.
+MIT
