@@ -4,7 +4,7 @@
 
 ## What This App Does
 
-FairShare is a shared expense manager built for flatmates who need to transition from a manual spreadsheet to a structured, automated system. It parses expense exports, runs validation rules to flag data entry issues, and calculates precise individual balances. By tracking room membership timelines, the application ensures that roommates only pay for expenses incurred during their active lease dates.
+SplitSmart is a shared expense manager built for flatmates who need to transition from a manual spreadsheet to a structured, automated system. It parses expense exports, runs validation rules to flag data entry issues, and calculates precise individual balances. By tracking room membership timelines, the application ensures that roommates only pay for expenses incurred during their active lease dates.
 
 The system automates debt settlements by matching payments directly against group balance records and simplifying overall transaction paths. It handles conversions for multi-currency transactions and provides a clear breakdown of each person's outstanding balances. Flagged actions, such as expense deletions, go through a queue-based approval flow to ensure that records are not modified without roommate confirmation.
 
