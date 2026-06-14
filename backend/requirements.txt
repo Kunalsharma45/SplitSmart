@@ -6,3 +6,5 @@ channels
 channels-redis
 python-dotenv
 mysqlclient
+openai==0.28.1
+

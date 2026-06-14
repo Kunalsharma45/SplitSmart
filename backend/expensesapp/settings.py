@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     'approvals',
     'audit',
     'notifications',
+    'ai',
 ]
 
 MIDDLEWARE = [
@@ -120,3 +121,8 @@ USE_TZ = True
 
 STATIC_URL = 'static/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+OPENAI_API_KEY = os.getenv('OPENAI_API_KEY', '')
+OPENAI_MODEL = os.getenv('OPENAI_MODEL', 'gpt-4o-mini')
+AI_MAX_CALLS_PER_HOUR = int(os.getenv('AI_MAX_CALLS_PER_HOUR', '20'))
+
