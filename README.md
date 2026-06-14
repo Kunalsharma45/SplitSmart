@@ -320,7 +320,8 @@ WebSocket endpoint:
 Backend on Render:
 1. Create a new Web Service on render.com and connect your GitHub repository.
 2. Set the build command: `pip install -r requirements.txt`.
-3. Set the start command: `daphne -p $PORT expensesapp.asgi:application`.
+3. Set the start command: `daphne -b 0.0.0.0 -p $PORT expensesapp.asgi:application`.
+
 4. Define your environment variables matching `.env.example`.
 5. Set `DJANGO_SETTINGS_MODULE` to `expensesapp.settings`.
 
