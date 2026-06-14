@@ -1,6 +1,6 @@
 # DECISIONS.md
 
-This file documents the significant decisions made while building FairShare, why each decision was made, and what trade-offs were accepted.
+This file documents the significant decisions made while building SplitSmart, why each decision was made, and what trade-offs were accepted.
 
 ---
 
