@@ -15,7 +15,7 @@ export default function LandingPage() {
               <path strokeLinecap="round" strokeLinejoin="round" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
             </svg>
             <span className="text-xl font-bold bg-gradient-to-r from-white via-slate-200 to-indigo-400 bg-clip-text text-transparent">
-              FairShare
+              SplitSmart
             </span>
           </div>
           <div className="flex items-center gap-4">
@@ -61,7 +61,7 @@ export default function LandingPage() {
           <div className="max-w-2xl mx-auto text-center mb-10">
             <h2 className="text-2xl font-bold text-white">Solving the Real Spreadsheet Mess</h2>
             <p className="mt-2 text-slate-400 text-sm">
-              We parsed the flatmates' shared spreadsheet exports containing currency differences, overlaps, and moving dates. Here is how FairShare resolves their specific concerns.
+              We parsed the flatmates' shared spreadsheet exports containing currency differences, overlaps, and moving dates. Here is how SplitSmart resolves their specific concerns.
             </p>
           </div>
 
@@ -178,7 +178,7 @@ export default function LandingPage() {
       <footer className="border-t border-slate-900 py-12 bg-slate-950 relative z-10">
         <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row items-center justify-between gap-6">
           <p className="text-xs text-slate-500">
-            &copy; 2026 FairShare. Shared apartment budgeting built for Spreetail.
+            &copy; 2026 SplitSmart. Shared apartment budgeting built for Spreetail.
           </p>
           <div className="flex gap-6 text-xs text-slate-400 font-mono">
             <Link to="/docs/SCOPE.md" className="hover:text-white transition">Scope</Link>
