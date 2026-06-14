@@ -28,4 +28,5 @@ urlpatterns = [
     path('api/v1/', include('approvals.urls')),
     path('api/v1/', include('notifications.urls')),
     path('api/v1/', include('audit.urls')),
+    path('api/v1/ai/', include('ai.urls')),
 ]
