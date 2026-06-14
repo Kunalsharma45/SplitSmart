@@ -1,0 +1,13 @@
+title,date,amount,paid_by,description,currency,split_type,splits,category
+Duplicate Expense,2026-06-01,100,Alex,Team lunch,,EQUAL,,Food
+Duplicate Expense,2026-06-01,100,Alex,Team lunch,,EQUAL,,Food
+Negative Row,2026-06-02,-500,Bob,Refund for mistake,,EQUAL,,Misc
+Settlement Row,2026-06-03,200,Carol,Paid back to Alice,,EQUAL,,Transfer
+USD Row,2026-06-04,50,Dan,Payment for snacks,USD,EQUAL,,Food
+Member Missing,2026-06-05,75,Dev,Drinks at bar,,EQUAL,,Food
+Date Outside,2026-03-10,120,Sam,Old membership expense,,EQUAL,,Misc
+Missing PaidBy,2026-06-06,60,,Bought pens,,EQUAL,,Office
+Mixed Date,06/07/2026,90,Alex,Confusing date format,,EQUAL,,Misc
+CommaAmount,2026-06-08,"1,500",Eve,Big purchase,,EQUAL,,Gadgets
+SplitMismatch,2026-06-09,300,Frank,Project materials,,UNEQUAL,a=100;b=50,Materials
+UnknownSplitType,2026-06-10,200,Grace,Half split test,,HALF,a=100;b=100,Other
