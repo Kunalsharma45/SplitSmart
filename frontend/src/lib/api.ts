@@ -12,7 +12,9 @@ const api = axios.create({
 
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem('expense_access_token');
-  if (token && config.headers) {
+  const publicEndpoints = ['/auth/login/', '/auth/register/', '/auth/token/refresh/'];
+  const isPublic = config.url && publicEndpoints.some(endpoint => config.url?.includes(endpoint));
+  if (token && config.headers && !isPublic) {
     config.headers.Authorization = `Bearer ${token}`;
   }
   return config;
