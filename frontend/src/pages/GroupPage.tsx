@@ -49,7 +49,7 @@ export default function GroupPage() {
     if (!groupId) return;
     api.get(`/groups/${groupId}/`).then((response) => setGroup(response.data));
     api.get(`/expenses/?group=${groupId}`).then((response) => setExpenses(response.data.results || response.data));
-    api.get(`/groups/${groupId}/members/`).then((res) => setMembers(res.data));
+    api.get(`/groups/${groupId}/members/`).then((res) => setMembers(res.data.results || res.data));
   }, [groupId]);
 
   const createExpense = async () => {
@@ -85,7 +85,7 @@ export default function GroupPage() {
       // Add to group
       await api.post(`/groups/${groupId}/members/add/`, { user_id: userId, role: 'MEMBER', joined_at: newJoinedAt });
       const res = await api.get(`/groups/${groupId}/members/`);
-      setMembers(res.data);
+      setMembers(res.data.results || res.data);
       setNewUsername('');
       setNewEmail('');
       setNewPassword('');
@@ -101,7 +101,7 @@ export default function GroupPage() {
     try {
       await api.delete(`/groups/${groupId}/members/${userId}/remove/`);
       const res = await api.get(`/groups/${groupId}/members/`);
-      setMembers(res.data);
+      setMembers(res.data.results || res.data);
     } catch (err) {
       console.error(err);
     }
