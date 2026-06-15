@@ -125,6 +125,7 @@ export default function ExpenseForm({ groupId, members, onCreated, currentUserId
       const sum = visibleMembers.reduce((s, m) => s + (roundDown2(parseFloat(unsplitValues[m.user.id] || '0') || 0)), 0);
       if (Math.abs(sum - amt) > 1) errors.push('Unequal split sums must match total within ±1');
     }
+    console.log('[DEBUG] Amount:', amount, 'Parsed:', Number(amount), 'Errors:', errors);
     return errors;
   }, [amount, splitType, unsplitValues, visibleMembers]);
 
