@@ -310,7 +310,7 @@ export default function ExpenseForm({ groupId, members, onCreated, currentUserId
   };
 
   return (
-    <div className="rounded-2xl bg-white p-4 shadow-lg w-96">
+    <div className="rounded-2xl bg-white p-4 shadow-lg w-full">
       <h3 className="text-sm font-semibold">{expenseToEdit ? 'Edit Expense' : 'Add Expense'}</h3>
       <input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Title" className="mt-2 block rounded border px-3 py-2 w-full" />
       {fieldErrors.title && <div className="mt-1 text-sm text-red-600">{fieldErrors.title}</div>}
