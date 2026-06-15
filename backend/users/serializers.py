@@ -1,5 +1,6 @@
 from django.contrib.auth import password_validation
 from django.contrib.auth.models import Group
+from django.core.exceptions import ValidationError as DjangoValidationError
 from django.utils.translation import gettext_lazy as _
 from rest_framework import serializers
 
@@ -22,7 +23,10 @@ class RegisterSerializer(serializers.ModelSerializer):
         fields = ('username', 'email', 'password', 'display_name', 'avatar')
 
     def validate_password(self, value):
-        password_validation.validate_password(value, self.instance)
+        try:
+            password_validation.validate_password(value, self.instance)
+        except DjangoValidationError as e:
+            raise serializers.ValidationError(list(e.messages))
         return value
 
     def create(self, validated_data):
@@ -47,7 +51,10 @@ class ChangePasswordSerializer(serializers.Serializer):
     def validate(self, attrs):
         if attrs['new_password'] != attrs['new_password_confirm']:
             raise serializers.ValidationError({'new_password_confirm': _('Password confirmation does not match.')})
-        password_validation.validate_password(attrs['new_password'], self.context['request'].user)
+        try:
+            password_validation.validate_password(attrs['new_password'], self.context['request'].user)
+        except DjangoValidationError as e:
+            raise serializers.ValidationError({'new_password': list(e.messages)})
         return attrs
 
     def save(self, **kwargs):

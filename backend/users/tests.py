@@ -1,3 +1,4 @@
+from django.test import override_settings
 from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
@@ -26,6 +27,16 @@ class AuthTests(APITestCase):
         self.assertTrue(response.data['success'])
         self.assertEqual(User.objects.count(), 1)
         self.assertEqual(User.objects.first().username, 'aisha')
+
+    @override_settings(AUTH_PASSWORD_VALIDATORS=[{
+        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
+        'OPTIONS': {'min_length': 8}
+    }])
+    def test_register_with_weak_password_returns_400(self):
+        weak_data = self.user_data.copy()
+        weak_data['password'] = '123'
+        response = self.client.post(self.register_url, weak_data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_login_returns_tokens(self):
         User.objects.create_user(username='rohan', email='rohan@example.com', password='StrongP@ssw0rd')
