@@ -8,5 +8,7 @@ python-dotenv
 mysqlclient
 openai==0.28.1
 daphne
+psycopg2-binary
+
 
 

@@ -1,4 +1,4 @@
-# FairShare
+# SplitSmart
 
 A shared expenses app built for a group of flatmates who outgrew their spreadsheet.
 
