@@ -13,6 +13,30 @@ class AIService:
         Explain a CSV anomaly in simple, plain English using OpenAI gpt-4o-mini.
         If OpenAI API fails, falls back gracefully to a manual review response.
         """
+        # Normalize anomaly_type from frontend lowercase/snake_case to backend uppercase keys
+        anomaly_type = (anomaly_type or '').upper()
+        
+        normalization_map = {
+            'MISSING_DATE': 'MISSING_REQUIRED_FIELD',
+            'MISSING_AMOUNT': 'MISSING_REQUIRED_FIELD',
+            'MISSING_PAID_BY': 'MISSING_REQUIRED_FIELD',
+            'INVALID_AMOUNT': 'AMOUNT_FORMAT_ISSUE',
+            'INVALID_DATE': 'INCONSISTENT_DATE_FORMAT',
+            'DATE_INCONSISTENCY': 'INCONSISTENT_DATE_FORMAT',
+            'USD_DETECTED': 'CURRENCY_MISMATCH',
+            'SETTLEMENT_TEXT': 'SETTLEMENT_AS_EXPENSE',
+            'CURRENCY_SYMBOL_IN_AMOUNT': 'AMOUNT_FORMAT_ISSUE',
+            'SPLITS_MISSING': 'SPLIT_SUM_MISMATCH',
+            'SPLITS_MISMATCH': 'SPLIT_SUM_MISMATCH',
+            'INVALID_SPLITS': 'SPLIT_SUM_MISMATCH',
+            'PERCENTAGE_NOT_100': 'SPLIT_SUM_MISMATCH',
+            'INVALID_PERCENTAGE_SPLITS': 'SPLIT_SUM_MISMATCH',
+            'COMMA_IN_NUMBER': 'AMOUNT_FORMAT_ISSUE',
+            'CATEGORY_CASE': 'AMOUNT_FORMAT_ISSUE',
+            'TRIM_DESCRIPTION': 'AMOUNT_FORMAT_ISSUE',
+        }
+        anomaly_type = normalization_map.get(anomaly_type, anomaly_type)
+
         # Map anomaly types to static fields: recommended_action, action_label, confidence
         meta_mapping = {
             'DUPLICATE_ROW': {
