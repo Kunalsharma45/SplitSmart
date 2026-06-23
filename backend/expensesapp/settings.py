@@ -14,6 +14,7 @@ from pathlib import Path
 import os
 from datetime import timedelta
 from dotenv import load_dotenv
+import urllib.parse
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 load_dotenv(BASE_DIR / '.env')
@@ -83,17 +84,57 @@ TEMPLATES = [
 WSGI_APPLICATION = 'expensesapp.wsgi.application'
 ASGI_APPLICATION = 'expensesapp.asgi.application'
 
-DATABASE_ENGINE = os.getenv('DATABASE_ENGINE', os.getenv('DB_ENGINE', 'django.db.backends.sqlite3'))
-DATABASES = {
-    'default': {
-        'ENGINE': DATABASE_ENGINE,
-        'NAME': os.getenv('DATABASE_NAME', os.getenv('DB_NAME', BASE_DIR / 'db.sqlite3')),
-        'USER': os.getenv('DATABASE_USER', os.getenv('DB_USER', '')),
-        'PASSWORD': os.getenv('DATABASE_PASSWORD', os.getenv('DB_PASSWORD', '')),
-        'HOST': os.getenv('DATABASE_HOST', os.getenv('DB_HOST', '')),
-        'PORT': os.getenv('DATABASE_PORT', os.getenv('DB_PORT', '')),
+database_url = os.getenv('DATABASE_URL')
+if database_url:
+    try:
+        url = urllib.parse.urlparse(database_url)
+        scheme = url.scheme
+        engine_map = {
+            'postgres': 'django.db.backends.postgresql',
+            'postgresql': 'django.db.backends.postgresql',
+            'mysql': 'django.db.backends.mysql',
+            'sqlite': 'django.db.backends.sqlite3',
+        }
+        db_engine = engine_map.get(scheme, 'django.db.backends.sqlite3')
+        
+        db_conn = {
+            'ENGINE': db_engine,
+            'NAME': url.path[1:] if url.path else '',
+            'USER': urllib.parse.unquote(url.username) if url.username else '',
+            'PASSWORD': urllib.parse.unquote(url.password) if url.password else '',
+            'HOST': url.hostname or '',
+            'PORT': str(url.port) if url.port else '',
+        }
+        if 'postgres' in scheme:
+            db_conn['OPTIONS'] = {'sslmode': 'require'}
+            
+        DATABASES = {
+            'default': db_conn
+        }
+    except Exception:
+        DATABASE_ENGINE = os.getenv('DATABASE_ENGINE', os.getenv('DB_ENGINE', 'django.db.backends.sqlite3'))
+        DATABASES = {
+            'default': {
+                'ENGINE': DATABASE_ENGINE,
+                'NAME': os.getenv('DATABASE_NAME', os.getenv('DB_NAME', BASE_DIR / 'db.sqlite3')),
+                'USER': os.getenv('DATABASE_USER', os.getenv('DB_USER', '')),
+                'PASSWORD': os.getenv('DATABASE_PASSWORD', os.getenv('DB_PASSWORD', '')),
+                'HOST': os.getenv('DATABASE_HOST', os.getenv('DB_HOST', '')),
+                'PORT': os.getenv('DATABASE_PORT', os.getenv('DB_PORT', '')),
+            }
+        }
+else:
+    DATABASE_ENGINE = os.getenv('DATABASE_ENGINE', os.getenv('DB_ENGINE', 'django.db.backends.sqlite3'))
+    DATABASES = {
+        'default': {
+            'ENGINE': DATABASE_ENGINE,
+            'NAME': os.getenv('DATABASE_NAME', os.getenv('DB_NAME', BASE_DIR / 'db.sqlite3')),
+            'USER': os.getenv('DATABASE_USER', os.getenv('DB_USER', '')),
+            'PASSWORD': os.getenv('DATABASE_PASSWORD', os.getenv('DB_PASSWORD', '')),
+            'HOST': os.getenv('DATABASE_HOST', os.getenv('DB_HOST', '')),
+            'PORT': os.getenv('DATABASE_PORT', os.getenv('DB_PORT', '')),
+        }
     }
-}
 
 AUTH_USER_MODEL = 'users.User'
 
