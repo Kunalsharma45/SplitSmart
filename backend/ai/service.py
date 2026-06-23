@@ -148,12 +148,29 @@ class AIService:
             logger.error(f"Error formatting prompt: {e}")
             user_prompt = f"Explain the problem with row #{row_number} of split type {split_type} and amount {amount}."
 
-        # Call OpenAI Chat Completion
-        api_key = getattr(settings, 'OPENAI_API_KEY', '')
-        model = getattr(settings, 'OPENAI_MODEL', 'gpt-4o-mini')
+        # Call OpenAI/Gemini Chat Completion
+        gemini_key = getattr(settings, 'GEMINI_API_KEY', '')
+        openai_key = getattr(settings, 'OPENAI_API_KEY', '')
+
+        api_key = None
+        model = 'gpt-4o-mini'
+        api_base = "https://api.openai.com/v1"
+
+        if gemini_key:
+            api_key = gemini_key
+            api_base = "https://generativelanguage.googleapis.com/v1beta/openai/"
+            model = getattr(settings, 'GEMINI_MODEL', 'gemini-1.5-flash')
+        elif openai_key:
+            api_key = openai_key
+            if openai_key.startswith('AIzaSy'):
+                api_base = "https://generativelanguage.googleapis.com/v1beta/openai/"
+                model = getattr(settings, 'GEMINI_MODEL', 'gemini-1.5-flash')
+            else:
+                api_base = "https://api.openai.com/v1"
+                model = getattr(settings, 'OPENAI_MODEL', 'gpt-4o-mini')
 
         if not api_key:
-            logger.warning("OPENAI_API_KEY is not configured.")
+            logger.warning("Neither GEMINI_API_KEY nor OPENAI_API_KEY is configured.")
             return {
                 "explanation": "We could not generate an AI explanation right now. Please review the raw data above and decide whether to keep or reject this row.",
                 "recommended_action": "MANUAL_REVIEW",
@@ -164,6 +181,7 @@ class AIService:
 
         try:
             openai.api_key = api_key
+            openai.api_base = api_base
             response = openai.ChatCompletion.create(
                 model=model,
                 messages=[
