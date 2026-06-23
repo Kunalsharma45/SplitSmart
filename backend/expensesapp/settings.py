@@ -83,15 +83,15 @@ TEMPLATES = [
 WSGI_APPLICATION = 'expensesapp.wsgi.application'
 ASGI_APPLICATION = 'expensesapp.asgi.application'
 
-DATABASE_ENGINE = os.getenv('DATABASE_ENGINE', 'django.db.backends.sqlite3')
+DATABASE_ENGINE = os.getenv('DATABASE_ENGINE', os.getenv('DB_ENGINE', 'django.db.backends.sqlite3'))
 DATABASES = {
     'default': {
         'ENGINE': DATABASE_ENGINE,
-        'NAME': os.getenv('DATABASE_NAME', BASE_DIR / 'db.sqlite3'),
-        'USER': os.getenv('DATABASE_USER', ''),
-        'PASSWORD': os.getenv('DATABASE_PASSWORD', ''),
-        'HOST': os.getenv('DATABASE_HOST', ''),
-        'PORT': os.getenv('DATABASE_PORT', ''),
+        'NAME': os.getenv('DATABASE_NAME', os.getenv('DB_NAME', BASE_DIR / 'db.sqlite3')),
+        'USER': os.getenv('DATABASE_USER', os.getenv('DB_USER', '')),
+        'PASSWORD': os.getenv('DATABASE_PASSWORD', os.getenv('DB_PASSWORD', '')),
+        'HOST': os.getenv('DATABASE_HOST', os.getenv('DB_HOST', '')),
+        'PORT': os.getenv('DATABASE_PORT', os.getenv('DB_PORT', '')),
     }
 }
 
@@ -109,8 +109,8 @@ REST_FRAMEWORK = {
 }
 
 SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=int(os.getenv('SIMPLE_JWT_ACCESS_TOKEN_LIFETIME_MINUTES', '15'))),
-    'REFRESH_TOKEN_LIFETIME': timedelta(days=int(os.getenv('SIMPLE_JWT_REFRESH_TOKEN_LIFETIME_DAYS', '7'))),
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=int(os.getenv('SIMPLE_JWT_ACCESS_TOKEN_LIFETIME_MINUTES', os.getenv('SIMPLE_JWT_ACCESS_TOKEN_LIFETIME', os.getenv('JWT_ACCESS_TOKEN_LIFETIME_MINUTES', '15'))))),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=int(os.getenv('SIMPLE_JWT_REFRESH_TOKEN_LIFETIME_DAYS', os.getenv('SIMPLE_JWT_REFRESH_TOKEN_LIFETIME', os.getenv('JWT_REFRESH_TOKEN_LIFETIME_DAYS', '7'))))),
     'ROTATE_REFRESH_TOKENS': os.getenv('SIMPLE_JWT_ROTATE_REFRESH_TOKENS', 'True') == 'True',
     'BLACKLIST_AFTER_ROTATION': os.getenv('SIMPLE_JWT_BLACKLIST_AFTER_ROTATION', 'True') == 'True',
     'AUTH_HEADER_TYPES': ('Bearer',),
