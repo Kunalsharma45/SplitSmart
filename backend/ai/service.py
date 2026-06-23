@@ -182,13 +182,14 @@ class AIService:
 
         if gemini_key:
             api_key = gemini_key
-            api_base = "https://generativelanguage.googleapis.com/v1beta/openai/"
-            model = getattr(settings, 'GEMINI_MODEL', 'gemini-1.5-flash')
+            api_base = "https://generativelanguage.googleapis.com/v1beta/openai"
+            model = getattr(settings, 'GEMINI_MODEL', 'gemini-2.5-flash')
         elif openai_key:
             api_key = openai_key
-            if openai_key.startswith('AIzaSy'):
-                api_base = "https://generativelanguage.googleapis.com/v1beta/openai/"
-                model = getattr(settings, 'GEMINI_MODEL', 'gemini-1.5-flash')
+            # If the key starts with AIzaSy or doesn't start with sk- (and isn't mock), treat it as a Gemini key
+            if openai_key.startswith('AIzaSy') or (not openai_key.startswith('sk-') and not openai_key.startswith('mock-')):
+                api_base = "https://generativelanguage.googleapis.com/v1beta/openai"
+                model = getattr(settings, 'GEMINI_MODEL', 'gemini-2.5-flash')
             else:
                 api_base = "https://api.openai.com/v1"
                 model = getattr(settings, 'OPENAI_MODEL', 'gpt-4o-mini')
@@ -212,7 +213,7 @@ class AIService:
                     {"role": "system", "content": prompts.SYSTEM_PROMPT},
                     {"role": "user", "content": user_prompt}
                 ],
-                max_tokens=200,
+                max_tokens=1000,
                 temperature=0.3,
                 timeout=10
             )
